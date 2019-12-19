@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+  <head>
+    <title>Scaling samplers for high-dimensional models with stochastic nets</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Joshua J Bon Queensland University of Technology MCM2019 – July 11th" />
+    <link href="libs/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/default-fonts.css" rel="stylesheet" />
+    <link rel="stylesheet" href="bon-beach-title.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Scaling samplers for high-dimensional models with stochastic nets
+## <br><br>
+### Joshua J Bon<br>Queensland University of Technology<br>MCM2019 – July 11th
+
+---
+
+
+
+
+## Talk outline
+&lt;br&gt;
+1. **Bayesian Lasso**: An interesting reinterpretation (at least to me). 
+&lt;br&gt;&lt;br&gt;&lt;br&gt;
+2. **Stochastic constraints variables**: A good name?
+&lt;br&gt;&lt;br&gt;&lt;br&gt;
+3. **Stochastic nets**: Continuous shrinkage priors as stochastic constraints.
+&lt;br&gt;&lt;br&gt;&lt;br&gt;
+4. **Geometry**: I'll show some pictures and wave my hands.
+&lt;br&gt;&lt;br&gt;&lt;br&gt;
+5. **A new Gibbs sampler**: A bit speedy, more stable. *Or the MC part*.
+
+---
+
+## The Lasso 
+
+![](imgs/aquaman-hammerhead-1967-cartoon.JPG)&lt;!-- --&gt;
+
+&lt;!--- If aquaman can use a lasso under water, what can I do? "Weird" ---&gt; 
+
+---
+
+## The standard Lasso
+
+### Lagrangian form
+
+`$$\max_{\boldsymbol{\theta} \in \mathbb{R}^{p}} \log \pi(\boldsymbol{x}|\boldsymbol{\theta}) + \lambda \Vert \boldsymbol{\theta} \Vert_{1}$$`
+
+### Constrained form
+
+`$$			\max_{\tilde{\boldsymbol{\theta}} \in \mathbb{R}^{p}} \log \pi(\boldsymbol{x}|\tilde{\boldsymbol{\theta}}) \quad\text{ s.t. } \quad \Vert \tilde{\boldsymbol{\theta}} \Vert_{1} \leq \tilde{\omega}$$`
+
+
+
+---
+
+## The Bayesian Lasso
+
+### Standard probabilistic model:
+
+`$$(\boldsymbol{x}|\boldsymbol{\theta}) \sim \pi(\boldsymbol{x}|\boldsymbol{\theta})$$`
+`$$\boldsymbol{\theta} \overset{\text{iid}}{\sim} \text{DExp}(\lambda)$$`
+
+### Constrained probabilistic model:
+
+$$(\boldsymbol{x} \vert \boldsymbol{\theta}) \sim \pi(\boldsymbol{x} \vert \boldsymbol{\theta}) $$
+
+$$(\boldsymbol{\theta},\omega) \overset{\text{d}}{=} (\tilde{\boldsymbol{\theta}},\tilde{\omega}\;\; \text{s.t.}\;\; \Vert \tilde{\boldsymbol{\theta}} \Vert_{1} \leq \tilde{\omega}) $$
+
+`$$\tilde{\boldsymbol{\theta}} \sim f_{\tilde{\boldsymbol{\theta}}} \propto 1 \qquad \tilde{\omega} \sim \text{Exp}(\lambda)$$`
+&lt;!--- More complicated, but exposes inner facets, Marginalising over `\(\omega\)` results in the original Bayesian Lasso. ---&gt;
+
+---
+
+## The constrained Bayesian Lasso
+
+This looks suspiciously like changing the constrained Lasso
+&lt;br&gt;&lt;br&gt;
+`$$\max_{\tilde{\boldsymbol{\theta}} \in \mathbb{R}^{p}} \log \pi(\boldsymbol{x} \vert \tilde{\boldsymbol{\theta}}) \quad\text{ s.t. } \quad \Vert \tilde{\boldsymbol{\theta}} \Vert_{1} \leq \tilde{\omega}$$`
+&lt;br&gt;
+to a Bayesian problem by setting priors
+&lt;br&gt;&lt;br&gt;
+`$$\tilde{\boldsymbol{\theta}} \sim f_{\tilde{\boldsymbol{\theta}}} \propto 1 \qquad
+\tilde{\omega} \sim \text{Exp}(\lambda)\qquad
+\text{s.t.}\qquad \Vert \tilde{\boldsymbol{\theta}} \Vert_{1} \leq \tilde{\omega}$$`
+&lt;br&gt;
+just as we had with stochastic constraints.
+&lt;!--- 
+	\item Closer connection between Bayesian and standard Lasso
+	\item Connected by more than just the MAP
+\end{itemize} ---&gt;
+
+
+---
+
+## Duality and analogy to regularisation
+&lt;br&gt;&lt;br&gt;&lt;br&gt;
+
+| *Inference*  | *Regularisation*                                          |
+|--------------|-----------------------------------------------------------|
+| Optimisation | Penalty `\(\Longleftrightarrow\)` constraint                  |
+| Bayesian     | Prior   `\(\Longleftrightarrow\)` stochastic constraint prior |
+
+--
+
+&lt;br&gt;&lt;br&gt;
+&lt;!--- The duality between stochastic constraint priors and their standard representation is analagous to the duality between penalty and constraint regularisation in optimisation.---&gt;
+There is a duality in the optimisation setting, *and for the priors in a Bayesian analysis*.
+
+---
+
+## General stochastic constraint framework
+
+For continuous random variables:
+
+`$$p(\boldsymbol{\theta},\boldsymbol{\omega}) \propto f_{\tilde{\boldsymbol{\theta}}}(\boldsymbol{\theta})~f_{\tilde{\boldsymbol{\omega}}}(\boldsymbol{\omega})~1(\boldsymbol{r}(\boldsymbol{\theta}) \preceq \boldsymbol{\omega})$$`
+
+--
+
+|||
+|-------------------------|--------------|
+| Base prior             | `\(\tilde{\boldsymbol{\theta}} \sim f_{\tilde{\boldsymbol{\theta}}}, \quad \tilde{\boldsymbol{\theta}} \in \Theta \subseteq \mathbb{R}^{p}\)` |
+| Constraint variable      | `\(\tilde{\boldsymbol{\omega}} \sim f_{\tilde{\boldsymbol{\omega}}}, \quad \tilde{\boldsymbol{\omega}} \in \Omega \subseteq \mathbb{R}^{q}\)` |
+| Penalty function  | `\(\boldsymbol{r}(\boldsymbol{\theta}): \qquad \Theta \rightarrow \Omega\)` |
+
+--
+
+**Key ideas**: 
+
+- Truncation is applied *jointly* to base and constraint variables.
+
+--
+
+- Decomposition exposes marginal and multivariate components of the prior.
+
+--
+
+**Connections**: Scale mixture of normal/uniform, slice sampling, skew random variables, exponentially tilted random variables,...
+
+&lt;!---#### Base prior: 
+
+`\(\tilde{\boldsymbol{\theta}} \sim f_{\tilde{\boldsymbol{\theta}}}, \quad \tilde{\boldsymbol{\theta}} \in \Theta \subseteq \mathbb{R}^{p}\)`.
+    
+#### Constraint variable: 
+
+`\(\tilde{\boldsymbol{\omega}} \sim f_{\tilde{\boldsymbol{\omega}}}, \quad \tilde{\boldsymbol{\omega}} \in \Omega \subseteq \mathbb{R}^{q}\)`
+    
+#### Penalty function: 
+
+`\(\boldsymbol{r}(\boldsymbol{\theta}): \Theta \rightarrow \Omega\)` 
+
+
+## Stochastic constraint framework
+
+### Structure
+
+`$$(\boldsymbol{\theta}, \boldsymbol{\omega} \vert \boldsymbol{\lambda}) \overset{\text{d}}{=} (\tilde{\boldsymbol{\theta}}, \tilde{\boldsymbol{\omega}} \;\vert\;  \boldsymbol{r}(\tilde{\boldsymbol{\theta}}) \preceq \tilde{\boldsymbol{\omega}}, \boldsymbol{\lambda})$$`
+
+`$$\tilde{\boldsymbol{\theta}} \sim f_{\tilde{\boldsymbol{\theta}}}$$` 
+`$$(\tilde{\boldsymbol{\omega}} \vert \boldsymbol{\lambda}) \sim f_{\tilde{\boldsymbol{\omega}}  \vert \boldsymbol{\lambda}}$$`
+
+The joint support of the joint distribution `\((\tilde{\boldsymbol{\theta}}, \tilde{\boldsymbol{\omega}})\)` is constrained element-wise by the inequality `\(\boldsymbol{r}(\tilde{\boldsymbol{\theta}} ) \preceq \tilde{\boldsymbol{\omega}}\)`.--&gt;
+
+
+---
+
+## Examples
+
+&lt;img src="imgs/aquaman-lasso2.gif" width="732" height="488" /&gt;
+
+---
+
+## 1D example
+
+| Base prior | Penalty | Constraint |
+|------------|---------|------------|
+| `\(\text{N}(0,1)\)` | `\(-\)` | `\(-\)` |
+
+&lt;img src="index_files/figure-html/sc-example-1-1.png" width="600" height="400" style="display: block; margin: auto;" /&gt;
+
+---
+
+## 1D example
+
+| Base prior | Penalty | Constraint |
+|------------|---------|------------|
+| `\(\text{N}(0,1)\)` | `\(\vert\theta\vert\)` | `\(\text{Exp}(1)\)` |
+
+&lt;img src="index_files/figure-html/sc-example-2-1.png" width="600" height="400" style="display: block; margin: auto;" /&gt;
+
+---
+
+## 1D example
+
+| Base prior | Penalty | Constraint |
+|------------|---------|------------|
+| `\(\text{N}(0,1)\)` | `\(\vert\theta\vert\)` | `\(\text{Gamma}(0.5,1)\)` |
+
+&lt;img src="index_files/figure-html/sc-example-3-1.png" width="600" height="400" style="display: block; margin: auto;" /&gt;
+
+---
+
+## Horseshoe prior
+
+`$$(\boldsymbol{\theta}, \boldsymbol{\omega} \;\vert\; \boldsymbol{\lambda}) \overset{\text{d}}{=} \left( \tilde{\boldsymbol{\theta}}, \tilde{\boldsymbol{\omega}} \;\vert\; \tilde{\theta}_{i}^{2} \leq \tilde{\omega}_{i} \;\forall i \in P, \boldsymbol{\lambda} \right)$$`
+`$$\tilde{\boldsymbol{\theta}} \sim f_{\tilde{\boldsymbol{\theta}}} \propto 1$$`
+`$$(\tilde{\omega}_{i}\vert\lambda_{i},\tau) \sim \text{Exp}(2^{-1} [\lambda_{i}\tau]^{-2})$$`
+`$$\lambda_{i} \sim \text{Cauchy}_{+}(0,1)$$`
+`$$\tau  \sim \text{Cauchy}_{+}(0,1)$$`
+`$$\text{for } i \in P = \{1,2,3,\ldots,p\}$$`
+--
+
+Similar representations exist for
+- Scale-normal mixtures
+- Regularised-horseshoe
+- Dirichlet-Laplace
+- R2-D2 prior
+
+&lt;!--- Add box around SC part to demo marginalisation?---&gt;
+
+---
+
+## Stochastic nets
+
+- A restricted family of stochastic constraint priors contain all(?) continuous shrinkage priors (horseshoe etc.) in the Bayesian literature.
+
+- I refer to these as *stochastic nets*.
+
+**... why?**
+
+--
+
+&lt;img src="imgs/aquaman-flying-fish.gif" style="display: block; margin: auto;" /&gt;
+
+---
+
+## Visualisation of generative process
+
+`$$(x,y) \sim \text{N}(0,1)$$`
+`$$\boldsymbol{\lambda} \sim \text{Dir}(1,1)$$`
+
+`$$\tau \sim \text{Exp}(2)$$`
+
+`$$\text{s.t. } \lambda_{1}\vert x \vert + \lambda_{2}\vert y \vert \leq \tau$$`
+
+&lt;img src="imgs/sc-rejection-viz1.gif" style="display: block; margin: auto;" /&gt;
+
+---
+
+## Visualisation of generative process
+
+`$$(x,y) \sim \text{N}(0,1)$$`
+`$$\boldsymbol{\lambda} \sim \text{Dir}(1,1)$$`
+
+`$$\tau \sim \text{Exp}(2)$$`
+
+`$$\text{s.t. } \lambda_{1}\vert x \vert + \lambda_{2}\vert y \vert \leq \tau$$`
+
+&lt;img src="imgs/sc-rejection-viz1-pause.png" style="display: block; margin: auto;" /&gt;
+
+---
+
+## A stochastic net: constraining variables
+
+&lt;img src="imgs/sc-rej-shape-only.png" width="600" height="500" style="display: block; margin: auto;" /&gt;
+
+---
+
+## Gibbs samplers for continuous-shrinkage priors
+
+**Normal model**: `\((\boldsymbol{y} ~\vert~ \boldsymbol{X}, \boldsymbol{\beta},\sigma^2) \sim \text{N}(\boldsymbol{X} \boldsymbol{\beta}, \sigma^2\boldsymbol{I})\)`.
+
+--
+
+### Ingredients of standard algorithm
+
+--
+
+(a) Sample `\((\boldsymbol{\beta}~\vert~ \boldsymbol{\lambda}, \sigma^2, \tau) \sim \text{N}(\boldsymbol{\mu},\boldsymbol{V})\)`.
+   - `\(\boldsymbol{\mu} = \boldsymbol{V}\boldsymbol{X}^{\top}\boldsymbol{y}\)`
+   - `\(\boldsymbol{V} = (\boldsymbol{X}^{\top}\boldsymbol{X} + \boldsymbol{S}^{-1})^{-1}\)`
+   - `\(\boldsymbol{S}\)` = diagonal matrix from `\(\boldsymbol{\lambda}\)` and `\(\tau\)`.
+
+--
+
+(b) Sample `\((\sigma^2~\vert~\boldsymbol{\beta}, \boldsymbol{\lambda}, \tau) \sim \text{IG}(a_{1},a_{2})\)`
+
+--
+
+(c) Sample `\((\boldsymbol{\lambda}~\vert~\boldsymbol{\beta}, \sigma^2, \tau)\)`
+
+--
+
+(d) Sample `\((\tau~\vert~ \boldsymbol{\beta}, \boldsymbol{\lambda}, \sigma^2)\)`
+
+--
+
+**Q:** What is the computational bottleneck of this algorithm?
+
+--
+
+**A:** Inverting (or decomposing) `\(\boldsymbol{V}\)` is `\(\mathcal{O}(p^3)\)`.
+
+---
+
+### Truncated-Gibbs sampler
+
+**Aim**: Exploit the geometry by decomposing the prior to create a better Gibbs sampler.
+
+--
+
+(a1) Sample `\((\boldsymbol{\omega}~\vert~\boldsymbol{\beta}, \boldsymbol{\lambda}, \sigma^2, \tau) \sim \text{sExp}(b_1)\)`
+
+--
+
+   - Use `\(\boldsymbol{\omega}\)` (current magnitude) to choose appropriate sampling step, namely
+
+--
+   
+   - Order `\(\boldsymbol{\omega}\)` by size and split into two groups, `\(I\)` and `\(J\)`. Where `\(\omega_{i} \leq \epsilon\)` for `\(i \in I\)`.
+
+
+--
+
+(a2) Sample `\((\beta_{i}~\vert~ \boldsymbol{\beta}_{(i)},\boldsymbol{\omega}, \boldsymbol{\lambda}, \sigma^2, \tau) \sim \text{U}(-\omega_{i}^{1/\nu},\omega_{i}^{1/\nu})\)` with MH correction for `\(i \in I\)`.
+
+--
+
+   - The dependence on `\(\boldsymbol{\beta}_{(i)}\)` exists but is very small. You can argue that `\((\beta_{i}~\vert~ \boldsymbol{\beta}_{(i)},\boldsymbol{\omega}, \boldsymbol{\lambda}, \sigma^2, \tau) \overset{d}{\approx} (\beta_{i}~\vert~\boldsymbol{\omega}, \boldsymbol{\lambda}, \sigma^2, \tau)\)` if `\(\epsilon\)` is small enough.
+
+--
+
+(a3) Sample `\((\boldsymbol{\beta}_{J}~\vert~ \boldsymbol{\beta}_{I}, \boldsymbol{\lambda}, \sigma^2, \tau) \sim \text{N}(\boldsymbol{\mu}_{J|I},\boldsymbol{V}_{J|I})\)`.
+
+--
+
+   - Note: `\(\boldsymbol{\omega}\)` marginalised out. Not necessary, but practical.
+
+
+---
+
+### Truncated-Gibbs sampler
+
+**Aim**: Exploit the geometry by decomposing the prior to create a better Gibbs sampler.
+
+(a1) Sample `\((\boldsymbol{\omega}~\vert~\boldsymbol{\beta}, \boldsymbol{\lambda}, \sigma^2, \tau) \sim \text{sExp}(b_1)\)`
+
+(a2) Sample `\((\beta_{i}~\vert~ \boldsymbol{\beta}_{(i)},\boldsymbol{\omega}, \boldsymbol{\lambda}, \sigma^2, \tau) \sim \text{U}(-\omega_{i}^{1/\nu},\omega_{i}^{1/\nu})\)` with MH correction for `\(i \in I\)`.
+
+(a3) Sample `\((\boldsymbol{\beta}_{J}~\vert~ \boldsymbol{\beta}_{I}, \boldsymbol{\lambda}, \sigma^2, \tau) \sim \text{N}(\boldsymbol{\mu}_{J|I},\boldsymbol{V}_{J|I})\)`.
+
+--
+
+**Complexity**: 
+
+- `\(\mathcal{O}(\vert J \vert^{3} + p \vert I\vert)\)` in each iteration.
+
+--
+
+- We can fix `\(\vert J \vert\)` by selecting `\(\epsilon\)` adaptively. Then the complexity is `\(\mathcal{O}(p^2)\)`.
+
+---
+
+- In high dimensions with shrinkage priors, the majority of coefficients are forced to be very close to zero.
+ 
+--
+ 
+- Understanding the structure and geometry of the problem is important!
+
+
+--
+
+Be like Aquaman!
+&lt;br&gt;&lt;br&gt;
+&lt;img src="imgs/aquaman-jetski.gif" style="display: block; margin: auto;" /&gt;
+
+---
+
+## Results on some toy problems
+
+Model: Linear regression, iid Gaussian errors, using R2-D2 prior
+
+Simulation settings:
+
+`\(n = 100\)`
+
+`\(p \in \{500,1000,2500,5000\}\)`
+
+`\(\rho \in \{0.1,0.5\}\)`, controls correlation in `\(\boldsymbol{X}\)`
+
+`\(\epsilon \in \{0.1,0.2\}\)`
+
+`\(\boldsymbol{\beta} = [\boldsymbol{0}_{10}^{\top}~\boldsymbol{b}_{1}^{\top}~\boldsymbol{0}_{30}^{\top}~~\boldsymbol{b}_{2}^{\top}~\boldsymbol{0}_{p-50}^{\top}]^{\top}\)`
+
+`\(\boldsymbol{b}_{1} = [2,~2,−5,−5,−5]\)`
+
+`\(\boldsymbol{b}_{2} = [−2,−2,−2,~5,~5]\)`
+
+`\(2000\)` samples repeated independently 100 times.
+
+---
+
+### Mean (SD) computation time
+
+&lt;img src="imgs/avg-computation-time.png" width="500" height="500" style="display: block; margin: auto;" /&gt;
+
+---
+
+### Posterior mean (SD) of coefficient SSE
+
+&lt;img src="imgs/table-sse.png" height="500" style="display: block; margin: auto;" /&gt;
+
+---
+
+### Grouping and uniform proposal
+
+&lt;img src="imgs/table-mh-accept.png" width="550" height="500" style="display: block; margin: auto;" /&gt;
+
+---
+
+&lt;!---### Mean (SD) computation time
+
+&lt;img src="imgs/table-time.png" width="450" height="550" style="display: block; margin: auto;" /&gt;
+---&gt;
+
+## Conclusions
+
+- One technique for scaling with dimension where sparsity is desired.
+
+- Can be combined with other techniques
+
+- Other areas under investigation with stochastic constraints:
+
+   - Theoretical results
+   
+   - Discrete version
+
+   - Prior construction
+   
+   - Variable selection from continuous-shrinkage prior
+   
+   - You tell me!
+   
+- Acknowledgements: 
+
+   - Berwin Turlach, Kevin Murray, Chris Drovandi
+   - Pawsey HPC
+
+---
+
+## (A random sample of) Key references
+
+&lt;p&gt;&lt;cite&gt;Bhattacharya, A, D. Pati, N. S. Pillai, et al.
+(2015).
+&amp;ldquo;Dirichlet-Laplace priors for optimal shrinkage&amp;rdquo;.
+In: &lt;em&gt;Journal of the American Statistical Association&lt;/em&gt; 110.512, pp. 1479&amp;ndash;1490.&lt;/cite&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;cite&gt;Carvalho, C. M, N. G. Polson, and J. G. Scott
+(2010).
+&amp;ldquo;The horseshoe estimator for sparse signals&amp;rdquo;.
+In: &lt;em&gt;Biometrika&lt;/em&gt; 97.2, pp. 465&amp;ndash;480.
+DOI: &lt;a href="https://doi.org/10.1093/biomet/asq017"&gt;10.1093/biomet/asq017&lt;/a&gt;.&lt;/cite&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;cite&gt;Damien, P, J. Wakefield, and S. Walker
+(1999).
+&amp;ldquo;Gibbs sampling for Bayesian non-conjugate and hierarchical models by using auxiliary variables&amp;rdquo;.
+In: &lt;em&gt;Journal of the Royal Statistical Society: Series B (Statistical Methodology)&lt;/em&gt; 61.2, pp. 331&amp;ndash;344.&lt;/cite&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;cite&gt;Johndrow, J. E, P. Orenstein, and A. Bhattacharya
+(2018).
+&amp;ldquo;Bayes Shrinkage at GWAS scale: Convergence and Approximation Theory of a Scalable MCMC Algorithm for the Horseshoe Prior&amp;rdquo;.
+In: &lt;em&gt;arXiv preprint arXiv:1705.00841&lt;/em&gt;.&lt;/cite&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;cite&gt;Neal, R. M.
+(2003).
+&amp;ldquo;Slice sampling&amp;rdquo;.
+In: &lt;em&gt;Annals of Statistics&lt;/em&gt; 31.3, pp. 705&amp;ndash;767.&lt;/cite&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;cite&gt;Piironen, J. and A. Vehtari
+(2017).
+&amp;ldquo;Sparsity information and regularization in the horseshoe and other shrinkage priors&amp;rdquo;.
+In: &lt;em&gt;Electronic Journal of Statistics&lt;/em&gt; 11.2, pp. 5018&amp;ndash;5051.
+DOI: &lt;a href="https://doi.org/10.1214/17-ejs1337si"&gt;10.1214/17-ejs1337si&lt;/a&gt;.&lt;/cite&gt;&lt;/p&gt;
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
