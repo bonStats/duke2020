@@ -1,12 +1,12 @@
 ---
-title: "Scaling samplers for high-dimensional models with stochastic nets"
+title: "Stochastic nets and Bayesian regularization"
 subtitle: "<br><br>"
-author: "Joshua J Bon<br>Queensland University of Technology<br>MCM2019 -- July 11th"
+author: "Joshua J Bon<br>Queensland University of Technology<br>Duke University-- Jan 6th 2020"
 institute: ""
 date: ""
 output:
   xaringan::moon_reader:
-    css: ["default", "default-fonts","bon-beach-title.css"]
+    css: ["default", "default-fonts","hygge","bon-beach-title.css"]
     lib_dir: libs
     nature:
       highlightStyle: github
@@ -32,21 +32,21 @@ source("one-dim-sc-example-viz.R")
 
 ## Talk outline
 <br>
-1. **Bayesian Lasso**: An interesting reinterpretation (at least to me). 
+1. **Motivation from the Bayesian Lasso** 
 <br><br><br>
-2. **Stochastic constraints variables**: A good name?
+2. **Stochastic constraints variables**
 <br><br><br>
-3. **Stochastic nets**: Continuous shrinkage priors as stochastic constraints.
+3. **Stochastic nets** 
 <br><br><br>
-4. **Geometry**: I'll show some pictures and wave my hands.
+4. 
 <br><br><br>
-5. **A new Gibbs sampler**: A bit speedy, more stable. *Or the MC part*.
+5. 
 
 ---
 
 ## The Lasso 
 
-```{r aqua-lasso-1, echo=FALSE, eval=TRUE}
+```{r aqua-lasso-1, echo=FALSE, eval=TRUE, fig.align='center'}
 knitr::include_graphics("imgs/aquaman-hammerhead-1967-cartoon.JPG")
 ```
 
@@ -54,15 +54,28 @@ knitr::include_graphics("imgs/aquaman-hammerhead-1967-cartoon.JPG")
 
 ---
 
-## The standard Lasso
+## The (Standard) Lasso
 
-### Lagrangian form
+Optimization-based Lasso:
+<br><br><br>
 
-$$\max_{\boldsymbol{\theta} \in \mathbb{R}^{p}} \log \pi(\boldsymbol{x}|\boldsymbol{\theta}) + \lambda \Vert \boldsymbol{\theta} \Vert_{1}$$
+.pull-left[.full-width[.content-box-blue[
+**Lagrangian**
 
-### Constrained form
+$$\max_{\boldsymbol{\theta} \in \mathbb{R}^{p}} \log \pi(\boldsymbol{x}|\boldsymbol{\theta}) - \lambda \Vert \boldsymbol{\theta} \Vert_{1}$$
+]]]
 
-$$			\max_{\tilde{\boldsymbol{\theta}} \in \mathbb{R}^{p}} \log \pi(\boldsymbol{x}|\tilde{\boldsymbol{\theta}}) \quad\text{ s.t. } \quad \Vert \tilde{\boldsymbol{\theta}} \Vert_{1} \leq \tilde{\omega}$$
+.pull-right[.full-width[.content-box-red[
+**Constrained**
+
+$$\max_{\tilde{\boldsymbol{\theta}} \in \mathbb{R}^{p}} \log \pi(\boldsymbol{x}|\tilde{\boldsymbol{\theta}}) ~\text{ s.t. }~ \Vert \tilde{\boldsymbol{\theta}} \Vert_{1} \leq \tilde{\omega}$$
+]]]
+
+
+--
+
+
+- Lagrangian and constrained solutions are equal when $\tilde{\omega} = \Vert \boldsymbol{\theta}^{\star} \Vert_{1}$.
 
 ```{r tib-ref, echo=FALSE, eval=FALSE, results='asis'}
 cat("<br><br><br> see ",Citet("Tibshirani1996", bib = myBib))
@@ -72,35 +85,63 @@ cat("<br><br><br> see ",Citet("Tibshirani1996", bib = myBib))
 
 ## The Bayesian Lasso
 
-### Standard probabilistic model:
+Probabilistic-based Lasso:
+<br><br><br>
+
+.pull-left[.full-width[.content-box-blue[
+**Standard**
 
 $$(\boldsymbol{x}|\boldsymbol{\theta}) \sim \pi(\boldsymbol{x}|\boldsymbol{\theta})$$
 $$\boldsymbol{\theta} \overset{\text{iid}}{\sim} \text{DExp}(\lambda)$$
+]]]
 
-### Constrained probabilistic model:
+--
 
-$$(\boldsymbol{x} \vert \boldsymbol{\theta}) \sim \pi(\boldsymbol{x} \vert \boldsymbol{\theta}) $$
+.pull-right[.full-width[.content-box-red[
+**Constrained**
 
-$$(\boldsymbol{\theta},\omega) \overset{\text{d}}{=} (\tilde{\boldsymbol{\theta}},\tilde{\omega}\;\; \text{s.t.}\;\; \Vert \tilde{\boldsymbol{\theta}} \Vert_{1} \leq \tilde{\omega}) $$
+$$(\boldsymbol{x} \vert \boldsymbol{\theta}) \sim \pi(\boldsymbol{x} \vert \boldsymbol{\theta})$$
+
+$$(\boldsymbol{\theta},\omega) \overset{\text{d}}{=} (\tilde{\boldsymbol{\theta}},\tilde{\omega}\;\; \text{s.t.}\;\; \Vert \tilde{\boldsymbol{\theta}} \Vert_{1} \leq \tilde{\omega})$$
 
 $$\tilde{\boldsymbol{\theta}} \sim f_{\tilde{\boldsymbol{\theta}}} \propto 1 \qquad \tilde{\omega} \sim \text{Exp}(\lambda)$$
+]]]
+
+--
+
+- Marginalising over $\tilde{\omega}$ results in the standard Bayesian Lasso.
+
+- Both MAPs are equivalent to optimization-based Lasso (Lagrangian).
+
 <!--- More complicated, but exposes inner facets, Marginalising over $\omega$ results in the original Bayesian Lasso. --->
 
 ---
 
-## The constrained Bayesian Lasso
+## The regularization through constraints
 
-This looks suspiciously like changing the constrained Lasso
+Comparing the regularization:
+<br><br><br>
+
+.pull-left[.full-width[.content-box-red[
+**Constrained optimization**
+
+$$\Vert \tilde{\boldsymbol{\theta}} \Vert_{1} \leq \tilde{\omega}$$
+]]]
+
+.pull-right[.full-width[.content-box-red[
+**Constrained prior**
+
+$$(\boldsymbol{\theta},\omega) \overset{\text{d}}{=} (\tilde{\boldsymbol{\theta}},\tilde{\omega}\;\; \text{s.t.}\;\; \Vert \tilde{\boldsymbol{\theta}} \Vert_{1} \leq \tilde{\omega})$$
+
+$$\tilde{\boldsymbol{\theta}} \sim f_{\tilde{\boldsymbol{\theta}}} \propto 1 \qquad \tilde{\omega} \sim \text{Exp}(\lambda)$$
+]]]
+
+
+--
 <br><br>
-$$\max_{\tilde{\boldsymbol{\theta}} \in \mathbb{R}^{p}} \log \pi(\boldsymbol{x} \vert \tilde{\boldsymbol{\theta}}) \quad\text{ s.t. } \quad \Vert \tilde{\boldsymbol{\theta}} \Vert_{1} \leq \tilde{\omega}$$
-<br>
-to a Bayesian problem by setting priors
-<br><br>
-$$\tilde{\boldsymbol{\theta}} \sim f_{\tilde{\boldsymbol{\theta}}} \propto 1 \qquad
-\tilde{\omega} \sim \text{Exp}(\lambda)\qquad
-\text{s.t.}\qquad \Vert \tilde{\boldsymbol{\theta}} \Vert_{1} \leq \tilde{\omega}$$
-<br>
-just as we had with stochastic constraints.
+The pdf for the prior is
+$$p(\boldsymbol{\theta},\omega) \propto \exp(-\lambda\omega)1(\Vert \boldsymbol{\theta} \Vert_{1} \leq \omega)$$
+
 <!--- 
 	\item Closer connection between Bayesian and standard Lasso
 	\item Connected by more than just the MAP
@@ -109,19 +150,21 @@ just as we had with stochastic constraints.
 
 ---
 
-## Duality and analogy to regularisation
+## Duality and analogy to regularization
 <br><br><br>
 
-| *Inference*  | *Regularisation*                                          |
+| *Inference*  | *Regularization*                                          |
 |--------------|-----------------------------------------------------------|
-| Optimisation | Penalty $\Longleftrightarrow$ constraint                  |
+| Optimization | Penalty $\Longleftrightarrow$ constraint                  |
 | Bayesian     | Prior   $\Longleftrightarrow$ stochastic constraint prior |
 
 --
 
 <br><br>
-<!--- The duality between stochastic constraint priors and their standard representation is analagous to the duality between penalty and constraint regularisation in optimisation.--->
-There is a duality in the optimisation setting, *and for the priors in a Bayesian analysis*.
+<!--- The duality between stochastic constraint priors and their standard representation is analagous to the duality between penalty and constraint regularization in optimization.--->
+There is a duality in the optimization setting, 
+
+*and for the priors in a Bayesian analysis*.
 
 ---
 
@@ -134,10 +177,10 @@ $$p(\boldsymbol{\theta},\boldsymbol{\omega}) \propto f_{\tilde{\boldsymbol{\thet
 --
 
 |||
-|-------------------------|--------------|
-| Base prior             | $\tilde{\boldsymbol{\theta}} \sim f_{\tilde{\boldsymbol{\theta}}}, \quad \tilde{\boldsymbol{\theta}} \in \Theta \subseteq \mathbb{R}^{p}$ |
+|---------------------------|--------------|
+| Base prior               | $\tilde{\boldsymbol{\theta}} \sim f_{\tilde{\boldsymbol{\theta}}}, \quad \tilde{\boldsymbol{\theta}} \in \Theta \subseteq \mathbb{R}^{p}$  |
 | Constraint variable      | $\tilde{\boldsymbol{\omega}} \sim f_{\tilde{\boldsymbol{\omega}}}, \quad \tilde{\boldsymbol{\omega}} \in \Omega \subseteq \mathbb{R}^{q}$ |
-| Penalty function  | $\boldsymbol{r}(\boldsymbol{\theta}): \qquad \Theta \rightarrow \Omega$ |
+| Penalty function         | $\boldsymbol{r}(\boldsymbol{\theta}): \qquad \Theta \rightarrow \Omega$ |
 
 --
 
@@ -224,45 +267,49 @@ print(plot_normal_l1_gamma)
 
 ---
 
-## Horseshoe prior
+## The Bayesian Lasso prior (again)
 
-$$(\boldsymbol{\theta}, \boldsymbol{\omega} \;\vert\; \boldsymbol{\lambda}) \overset{\text{d}}{=} \left( \tilde{\boldsymbol{\theta}}, \tilde{\boldsymbol{\omega}} \;\vert\; \tilde{\theta}_{i}^{2} \leq \tilde{\omega}_{i} \;\forall i \in P, \boldsymbol{\lambda} \right)$$
-$$\tilde{\boldsymbol{\theta}} \sim f_{\tilde{\boldsymbol{\theta}}} \propto 1$$
-$$(\tilde{\omega}_{i}\vert\lambda_{i},\tau) \sim \text{Exp}(2^{-1} [\lambda_{i}\tau]^{-2})$$
-$$\lambda_{i} \sim \text{Cauchy}_{+}(0,1)$$
-$$\tau  \sim \text{Cauchy}_{+}(0,1)$$
-$$\text{for } i \in P = \{1,2,3,\ldots,p\}$$
---
+- Global version of prior
 
-Similar representations exist for
-- Scale-normal mixtures
-- Regularised-horseshoe
-- Dirichlet-Laplace
-- R2-D2 prior
+- Local version of prior
 
-<!--- Add box around SC part to demo marginalisation?--->
+---
+
+## The Bayesian Lasso posterior (again)
+
+- Posterior is also a stochastic constraint RV
+
+- Local version used Bayesian computation
 
 ---
 
 ## Stochastic nets
 
-- A restricted family of stochastic constraint priors contain all(?) continuous shrinkage priors (horseshoe etc.) in the Bayesian literature.
+- A restricted family of stochastic constraint priors
 
-- I refer to these as *stochastic nets*.
+.pull-left[.full-width[.content-box-blue[
+$$\begin{aligned}
+	\left(\boldsymbol{\theta}, \omega \vert \boldsymbol{k} \right) &\overset{\text{d}}{=} \left( \tilde{\boldsymbol{\theta}}, \tilde{\omega} \mid  \Vert \tilde{\boldsymbol{\theta}} \oslash \boldsymbol{k} \Vert_{\nu}^{\nu} \leq \tilde{\omega},  \boldsymbol{k}\right) \\ 
+	\tilde{\boldsymbol{\theta}} &\sim f_{\tilde{\boldsymbol{\theta}}} \propto 1, \quad \tilde{\boldsymbol{\theta}} \in \mathbb{R}^{p} \\ 
+	 \tilde{\omega} &\sim \text{Exp}(1) \\
+	 \boldsymbol{k} &\sim f_{\boldsymbol{k}}
+\end{aligned}$$
+]]]
 
-**... why?**
-
---
-
-```{r aqua-flying-fish, echo=FALSE, eval=TRUE, fig.align='center'}
-knitr::include_graphics("imgs/aquaman-flying-fish.gif")
+.pull-right[
+```{r sc-reject-shape, echo=FALSE, eval=TRUE, fig.align='center', out.height=300, out.width=360}
+knitr::include_graphics("imgs/sc-rej-shape-only.png")
 ```
+]
+
+- Includes continuous shrinkage priors (horseshoe etc.)
 
 ---
 
 ## Visualisation of generative process
 
 $$(x,y) \sim \text{N}(0,1)$$
+
 $$\boldsymbol{\lambda} \sim \text{Dir}(1,1)$$
 
 $$\tau \sim \text{Exp}(2)$$
@@ -290,11 +337,41 @@ knitr::include_graphics("imgs/sc-rejection-viz1-pause.png")
 
 ---
 
-## A stochastic net: constraining variables
+## Horseshoe prior
 
-```{r sc-reject-shape, echo=FALSE, eval=TRUE, fig.align='center', out.height=500, out.width=600}
-knitr::include_graphics("imgs/sc-rej-shape-only.png")
-```
+$$(\boldsymbol{\theta}, \boldsymbol{\omega} \;\vert\; \boldsymbol{\lambda}) \overset{\text{d}}{=} \left( \tilde{\boldsymbol{\theta}}, \tilde{\boldsymbol{\omega}} \;\vert\; \tilde{\theta}_{i}^{2} \leq \tilde{\omega}_{i} \;\forall i \in P, \boldsymbol{\lambda} \right)$$
+$$\tilde{\boldsymbol{\theta}} \sim f_{\tilde{\boldsymbol{\theta}}} \propto 1$$
+$$(\tilde{\omega}_{i}\vert\lambda_{i},\tau) \sim \text{Exp}(2^{-1} [\lambda_{i}\tau]^{-2})$$
+$$\lambda_{i} \sim \text{Cauchy}_{+}(0,1)$$
+$$\tau  \sim \text{Cauchy}_{+}(0,1)$$
+$$\text{for } i \in P = \{1,2,3,\ldots,p\}$$
+--
+
+Similar representations exist for
+- Scale-normal mixtures
+- Regularized-horseshoe
+- Dirichlet-Laplace
+- R2-D2 prior
+
+<!--- Add box around SC part to demo marginalisation?--->
+
+---
+layout: false
+class: inverse, middle, center
+
+## Creating new priors with stochastic constraints
+
+---
+layout: false
+class: inverse, middle, center
+
+## Section 2
+
+---
+layout: false
+class: inverse, middle, center
+
+## Faster sampling for high-dimensional continuous shrinkage priors
 
 ---
 
@@ -389,7 +466,7 @@ knitr::include_graphics("imgs/sc-rej-shape-only.png")
 
 --
 
-- We can fix $\vert J \vert$ by selecting $\epsilon$ adaptively. Then the complexity is $\mathcal{O}(p^2)$.
+- We can fix $\vert J \vert$ by selecting $\epsilon$. Then the complexity is $\mathcal{O}(p^2)$.
 
 ---
 
@@ -487,6 +564,13 @@ knitr::include_graphics("imgs/table-time.png")
 
    - Berwin Turlach, Kevin Murray, Chris Drovandi
    - Pawsey HPC
+
+---
+
+```{r aqua-flying-fish, echo=FALSE, eval=TRUE, fig.align='center'}
+knitr::include_graphics("imgs/aquaman-flying-fish.gif")
+```
+
 
 ---
 
