@@ -24,15 +24,16 @@ class: center, middle, inverse, title-slide
 
 ## Talk outline
 &lt;br&gt;
-1. **Motivation from the Bayesian Lasso** 
+1. **Motivation from the (Bayesian) Lasso** 
 &lt;br&gt;&lt;br&gt;&lt;br&gt;
-2. **Stochastic constraints variables**
+2. **Stochastic constraints variables &amp; Stochastic nets**
 &lt;br&gt;&lt;br&gt;&lt;br&gt;
-3. **Stochastic nets** 
+3. **New priors from stochastic constraints** 
 &lt;br&gt;&lt;br&gt;&lt;br&gt;
-4. 
+4. **Faster samplers for High-dimensional shrinkage**
 &lt;br&gt;&lt;br&gt;&lt;br&gt;
-5. 
+5. **Discussion**
+
 
 ---
 
@@ -135,6 +136,25 @@ The pdf for the prior is
 	\item Connected by more than just the MAP
 \end{itemize} ---&gt;
 
+
+---
+
+## Synergy between computation and theory
+
+For 1D `\(\theta\)`, the pdf for the prior is
+`$$p(\theta,\omega) \propto \exp(-\lambda\omega)1(\vert \theta \vert \leq \omega)$$`
+which has a scale mixture of uniforms representation
+
+`$$\begin{aligned}
+(\theta~\vert~\omega) &amp;\sim \text{U}(-\omega, \omega) \\
+\omega &amp;\sim \text{Gam}(2,1)
+\end{aligned}$$`
+
+Similar exists for more dimensions, but only works for the prior.
+
+Used in SMU paper....
+
+Gelman comp leads to theory leads to comp paper.
 
 ---
 
@@ -249,9 +269,21 @@ The joint support of the joint distribution `\((\tilde{\boldsymbol{\theta}}, \ti
 
 ## The Bayesian Lasso prior (again)
 
-- Global version of prior
+.pull-left[.full-width[.content-box-red[
+**Global SC prior**
 
-- Local version of prior
+`$$(\boldsymbol{\theta},\omega) \overset{\text{d}}{=} (\tilde{\boldsymbol{\theta}},\tilde{\omega}\;\; \text{s.t.}\;\; \Vert \tilde{\boldsymbol{\theta}} \Vert_{1} \leq \tilde{\omega})$$`
+
+`$$\tilde{\boldsymbol{\theta}} \sim f_{\tilde{\boldsymbol{\theta}}} \propto 1 \qquad \tilde{\omega} \sim \text{Exp}(\lambda)$$`
+]]]
+
+.pull-right[.full-width[.content-box-red[
+**Local SC prior**
+
+`$$(\boldsymbol{\theta},\boldsymbol{\omega}) \overset{\text{d}}{=} (\tilde{\boldsymbol{\theta}},\tilde{\boldsymbol{\omega}}\;\; \text{s.t.}\;\; \vert \tilde{\theta}_{i} \vert \leq \tilde{\omega}_{i}, \; 1 \leq i \leq p)$$`
+
+`$$\tilde{\boldsymbol{\theta}} \sim f_{\tilde{\boldsymbol{\theta}}} \propto 1 \qquad \tilde{\boldsymbol{\omega}} \overset{\text{iid}}{\sim} \text{Exp}(\lambda)$$`
+]]]
 
 ---
 
@@ -281,15 +313,6 @@ The joint support of the joint distribution `\((\tilde{\boldsymbol{\theta}}, \ti
 ]
 
 - Includes continuous shrinkage priors (horseshoe etc.)
-
----
-
-## Stochastic nets
-
-
-
-
-
 
 ---
 
@@ -337,6 +360,20 @@ Similar representations exist for
 - R2-D2 prior
 
 &lt;!--- Add box around SC part to demo marginalisation?---&gt;
+
+---
+layout: false
+class: inverse, middle, center
+
+## Examples of new priors with stochastic constraints
+
+---
+
+## Shrinkage towards a nonzero value
+
+---
+
+## Positively-skewed Horseshoe
 
 ---
 layout: false
@@ -496,12 +533,28 @@ Simulation settings:
 
 &lt;img src="imgs/table-mh-accept.png" width="550" height="500" style="display: block; margin: auto;" /&gt;
 
----
-
 &lt;!---### Mean (SD) computation time
 
 &lt;img src="imgs/table-time.png" width="450" height="550" style="display: block; margin: auto;" /&gt;
 ---&gt;
+
+---
+layout: false
+class: inverse, middle, center
+
+## Discussion
+
+---
+
+## Strengths of SCP
+
+---
+
+## Weaknesses of SCP
+
++ Remedies
+
+---
 
 ## Conclusions
 
@@ -525,31 +578,27 @@ Simulation settings:
 
    - Berwin Turlach, Kevin Murray, Chris Drovandi
    - Pawsey HPC
+   - QUT &amp; ACEMS
 
 ---
 
 &lt;img src="imgs/aquaman-flying-fish.gif" style="display: block; margin: auto;" /&gt;
 
 
+
 ---
 
 ## (A random sample of) Key references
 
-&lt;p&gt;&lt;cite&gt;Carvalho, C. M, N. G. Polson, and J. G. Scott
-(2010).
-&amp;ldquo;The horseshoe estimator for sparse signals&amp;rdquo;.
-In: &lt;em&gt;Biometrika&lt;/em&gt; 97.2, pp. 465&amp;ndash;480.
-DOI: &lt;a href="https://doi.org/10.1093/biomet/asq017"&gt;10.1093/biomet/asq017&lt;/a&gt;.&lt;/cite&gt;&lt;/p&gt;
+&lt;p&gt;&lt;cite&gt;Gelman, A.
+(2004).
+&amp;ldquo;Parameterization and Bayesian modeling&amp;rdquo;.
+In: &lt;em&gt;Journal of the American Statistical Association&lt;/em&gt; 99.466, pp. 537&amp;ndash;545.&lt;/cite&gt;&lt;/p&gt;
 
-&lt;p&gt;&lt;cite&gt;Damien, P, J. Wakefield, and S. Walker
-(1999).
-&amp;ldquo;Gibbs sampling for Bayesian non-conjugate and hierarchical models by using auxiliary variables&amp;rdquo;.
-In: &lt;em&gt;Journal of the Royal Statistical Society: Series B (Statistical Methodology)&lt;/em&gt; 61.2, pp. 331&amp;ndash;344.&lt;/cite&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;cite&gt;Hahn, P. R, J. He, and H. F. Lopes
-&amp;ldquo;Efficient sampling for Gaussian linear regression with arbitrary priors&amp;rdquo;.
-In: &lt;em&gt;Journal of Computational and Graphical Statistics&lt;/em&gt;.
-URL: &lt;a href="https://doi.org/10.1080/10618600.2018.1482762"&gt;https://doi.org/10.1080/10618600.2018.1482762&lt;/a&gt;.&lt;/cite&gt;&lt;/p&gt;
+&lt;p&gt;&lt;cite&gt;Johndrow, J. E, P. Orenstein, and A. Bhattacharya
+(2018).
+&amp;ldquo;Bayes Shrinkage at GWAS scale: Convergence and Approximation Theory of a Scalable MCMC Algorithm for the Horseshoe Prior&amp;rdquo;.
+In: &lt;em&gt;arXiv preprint arXiv:1705.00841&lt;/em&gt;.&lt;/cite&gt;&lt;/p&gt;
 
 &lt;p&gt;&lt;cite&gt;Park, T. and G. Casella
 (2008).
@@ -561,6 +610,11 @@ In: &lt;em&gt;Journal of the American Statistical Association&lt;/em&gt; 103.482
 &amp;ldquo;Sparsity information and regularization in the horseshoe and other shrinkage priors&amp;rdquo;.
 In: &lt;em&gt;Electronic Journal of Statistics&lt;/em&gt; 11.2, pp. 5018&amp;ndash;5051.
 DOI: &lt;a href="https://doi.org/10.1214/17-ejs1337si"&gt;10.1214/17-ejs1337si&lt;/a&gt;.&lt;/cite&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;cite&gt;Walker, S, P. Damien, and M. Meyer
+(1997).
+&amp;ldquo;On scale mixtures of uniform distributions and the latent weighted least squares method&amp;rdquo;.
+In: &lt;em&gt;Working papers series, University of Michigan Ross School of Business&lt;/em&gt;.&lt;/cite&gt;&lt;/p&gt;
 
 &lt;p&gt;&lt;cite&gt;Zhang, Y, B. J. Reich, and H. D. Bondell
 (2017).

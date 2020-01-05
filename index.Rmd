@@ -32,15 +32,16 @@ source("one-dim-sc-example-viz.R")
 
 ## Talk outline
 <br>
-1. **Motivation from the Bayesian Lasso** 
+1. **Motivation from the (Bayesian) Lasso** 
 <br><br><br>
-2. **Stochastic constraints variables**
+2. **Stochastic constraints variables & Stochastic nets**
 <br><br><br>
-3. **Stochastic nets** 
+3. **New priors from stochastic constraints** 
 <br><br><br>
-4. 
+4. **Faster samplers for High-dimensional shrinkage**
 <br><br><br>
-5. 
+5. **Discussion**
+
 
 ---
 
@@ -147,6 +148,25 @@ $$p(\boldsymbol{\theta},\omega) \propto \exp(-\lambda\omega)1(\Vert \boldsymbol{
 	\item Connected by more than just the MAP
 \end{itemize} --->
 
+
+---
+
+## Synergy between computation and theory
+
+For 1D $\theta$, the pdf for the prior is
+$$p(\theta,\omega) \propto \exp(-\lambda\omega)1(\vert \theta \vert \leq \omega)$$
+which has a scale mixture of uniforms representation
+
+$$\begin{aligned}
+(\theta~\vert~\omega) &\sim \text{U}(-\omega, \omega) \\
+\omega &\sim \text{Gam}(2,1)
+\end{aligned}$$
+
+Similar exists for more dimensions, but only works for the prior.
+
+Used in SMU paper....
+
+Gelman comp leads to theory leads to comp paper.
 
 ---
 
@@ -269,17 +289,31 @@ print(plot_normal_l1_gamma)
 
 ## The Bayesian Lasso prior (again)
 
-- Global version of prior
+.pull-left[.full-width[.content-box-red[
+**Global SC prior**
 
-- Local version of prior
+$$(\boldsymbol{\theta},\omega) \overset{\text{d}}{=} (\tilde{\boldsymbol{\theta}},\tilde{\omega}\;\; \text{s.t.}\;\; \Vert \tilde{\boldsymbol{\theta}} \Vert_{1} \leq \tilde{\omega})$$
+
+$$\tilde{\boldsymbol{\theta}} \sim f_{\tilde{\boldsymbol{\theta}}} \propto 1 \qquad \tilde{\omega} \sim \text{Exp}(\lambda)$$
+]]]
+
+.pull-right[.full-width[.content-box-red[
+**Local SC prior**
+
+$$(\boldsymbol{\theta},\boldsymbol{\omega}) \overset{\text{d}}{=} (\tilde{\boldsymbol{\theta}},\tilde{\boldsymbol{\omega}}\;\; \text{s.t.}\;\; \vert \tilde{\theta}_{i} \vert \leq \tilde{\omega}_{i}, \; 1 \leq i \leq p)$$
+
+$$\tilde{\boldsymbol{\theta}} \sim f_{\tilde{\boldsymbol{\theta}}} \propto 1 \qquad \tilde{\boldsymbol{\omega}} \overset{\text{iid}}{\sim} \text{Exp}(\lambda)$$
+]]]
+
+$L_1$ versus $L_{\infty}$ constraint have same marginal distribution due to memorylessness property of exponential.
+
+Motivates use of non-serperable penalty functions, or in BA hierarchies which break this property.
 
 ---
 
 ## The Bayesian Lasso posterior (again)
 
 - Posterior is also a stochastic constraint RV
-
-- Local version used Bayesian computation
 
 ---
 
@@ -359,13 +393,15 @@ Similar representations exist for
 layout: false
 class: inverse, middle, center
 
-## Creating new priors with stochastic constraints
+## Examples of new priors with stochastic constraints
 
 ---
-layout: false
-class: inverse, middle, center
 
-## Section 2
+## Shrinkage towards a nonzero value
+
+---
+
+## Positively-skewed Horseshoe
 
 ---
 layout: false
@@ -533,14 +569,30 @@ knitr::include_graphics("imgs/table-sse.png")
 knitr::include_graphics("imgs/table-mh-accept.png")
 ```
 
----
-
 <!---### Mean (SD) computation time
 
 ```{r time-table, echo=FALSE, eval=TRUE, fig.align='center', out.height=550,out.width=450}
 knitr::include_graphics("imgs/table-time.png")
 ``` 
 --->
+
+---
+layout: false
+class: inverse, middle, center
+
+## Discussion
+
+---
+
+## Strengths of SCP
+
+---
+
+## Weaknesses of SCP
+
++ Remedies
+
+---
 
 ## Conclusions
 
@@ -564,12 +616,14 @@ knitr::include_graphics("imgs/table-time.png")
 
    - Berwin Turlach, Kevin Murray, Chris Drovandi
    - Pawsey HPC
+   - QUT & ACEMS
 
 ---
 
 ```{r aqua-flying-fish, echo=FALSE, eval=TRUE, fig.align='center'}
 knitr::include_graphics("imgs/aquaman-flying-fish.gif")
 ```
+
 
 
 ---
