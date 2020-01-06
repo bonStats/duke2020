@@ -47,7 +47,7 @@ class: center, middle, inverse, title-slide
 
 ## The (Standard) Lasso
 
-Optimization-based Lasso:
+Optimization-based Lasso (Tibshirani, 1996):
 &lt;br&gt;&lt;br&gt;&lt;br&gt;
 
 .pull-left[.full-width[.content-box-blue[
@@ -74,7 +74,7 @@ Optimization-based Lasso:
 
 ## The Bayesian Lasso
 
-Probabilistic-based Lasso:
+Probabilistic-based Lasso (Park and Casella, 2008):
 &lt;br&gt;&lt;br&gt;&lt;br&gt;
 
 .pull-left[.full-width[.content-box-blue[
@@ -404,7 +404,7 @@ Bayesian Lasso prior and posterior with stochastic constraints:
 
 ---
 
-## Horseshoe prior as stochastic net
+## Horseshoe prior as stochastic net 
 
 .content-box-red[
 `$$\begin{aligned}(\boldsymbol{\theta}, \omega \;\vert\; \boldsymbol{\lambda}) &amp;\overset{\text{d}}{=} \left( \tilde{\boldsymbol{\theta}}, \tilde{\omega} \;\vert\; \Vert\tilde{\boldsymbol{\theta}} \oslash \boldsymbol{\lambda} \Vert_{2}^{2} \leq \tilde{\omega}, \boldsymbol{\lambda} \right) \\
@@ -421,9 +421,8 @@ Bayesian Lasso prior and posterior with stochastic constraints:
 
 --
 
-Similar representations exist for
-- SNM, Regularized-horseshoe, Dirichlet-Laplace, R2-D2 prior
-- As well as "local" versions of these
+Representations exist for SNM, **Horseshoe** (Carvalho, Polson, and Scott, 2010), **Regularized-horseshoe** (Piironen and Vehtari, 2017), **Dirichlet-Laplace** (Bhattacharya, Pati, Pillai, and Dunson, 2015), **R2-D2** priors (Zhang, Reich, and Bondell, 2017)
+
 
 &lt;!--- Add box around SC part to demo marginalisation?---&gt;
 
@@ -483,8 +482,26 @@ with `\(k_{i} \sim \text{Beta}(1/2,1/2)\)`
 
 ## Positively-skewed Horseshoe
 
-Prior information that positive coefficients are highly probable
+Prior information that coefficients are positive with high probability
 
+Full horseshoe prior with skewed (improper) base prior
+
+.content-box-red[
+
+`$$\tilde{\theta}_{i} \sim f_{\tilde{\theta}_{i}}(\theta) \propto \Phi(\theta/\alpha) \quad \text{for } 1 \leq i \leq p$$`
+
+]
+
+--
+
+In simulations: normal regression with positive coefficients 
+
+`\(n = 60\)`, `\(p \in \{ 50, 100, 250\}\)`:
+
+- Reduced SSE for `\(\theta \in \{0\}\)` by factor of 2 to 4
+- SSE approximately equal for  `\(\theta \in (0,0.5)\)` 
+- SSE slightly worse for  `\(\theta \in [0.5,\infty)\)`
+- Improved AUC marginally
 
 
 ---
@@ -684,7 +701,11 @@ class: inverse, middle, center
 &lt;br&gt;
 - Rare event simulation
 - Difficult normalising constant in prior
-&lt;br&gt;&lt;br&gt;
+&lt;br&gt;
+
+`$$p(\boldsymbol{\theta},\boldsymbol{\omega}) \propto f_{\tilde{\boldsymbol{\theta}}}(\boldsymbol{\theta})~f_{\tilde{\boldsymbol{\omega}}}(\boldsymbol{\omega})~1(\boldsymbol{r}(\boldsymbol{\theta}) \preceq \boldsymbol{\omega})$$`
+
+&lt;br&gt;
 
 --
 
@@ -721,14 +742,15 @@ Other areas under investigation with stochastic constraints:
    &lt;br&gt;&lt;br&gt;
    - Duke University &amp; David Dunson
 
---
+---
+class: middle
 
 .pull-left[
 &lt;img src="imgs/aquaman-flying-fish.gif" width="350" height="258" style="display: block; margin: auto;" /&gt;
 ]
 
 .pull-right[
-
+**Thank you**
 &lt;br&gt;&lt;br&gt;&lt;br&gt;
 Twitter: `@bonstats`
 &lt;br&gt;&lt;br&gt;&lt;br&gt;
@@ -741,12 +763,23 @@ Email: `joshuajbon@gmail.com`
 
 ## References
 
+&lt;p&gt;&lt;cite&gt;Bhattacharya, A. et al.
+(2015).
+&amp;ldquo;Dirichlet-Laplace priors for optimal shrinkage&amp;rdquo;.
+In: &lt;em&gt;Journal of the American Statistical Association&lt;/em&gt; 110.512, pp. 1479&amp;ndash;1490.&lt;/cite&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;cite&gt;Carvalho, C. M. et al.
+(2010).
+&amp;ldquo;The horseshoe estimator for sparse signals&amp;rdquo;.
+In: &lt;em&gt;Biometrika&lt;/em&gt; 97.2, pp. 465&amp;ndash;480.
+DOI: &lt;a href="https://doi.org/10.1093/biomet/asq017"&gt;10.1093/biomet/asq017&lt;/a&gt;.&lt;/cite&gt;&lt;/p&gt;
+
 &lt;p&gt;&lt;cite&gt;Gelman, A.
 (2004).
 &amp;ldquo;Parameterization and Bayesian modeling&amp;rdquo;.
 In: &lt;em&gt;Journal of the American Statistical Association&lt;/em&gt; 99.466, pp. 537&amp;ndash;545.&lt;/cite&gt;&lt;/p&gt;
 
-&lt;p&gt;&lt;cite&gt;Mallick, H. and N. Yi
+&lt;p&gt;&lt;cite&gt;Mallick, H. et al.
 (2014).
 &amp;ldquo;A New Bayesian Lasso.&amp;rdquo;
 In: &lt;em&gt;Statistics and its interface&lt;/em&gt; 7.4, pp. 571&amp;ndash;582.&lt;/cite&gt;&lt;/p&gt;
@@ -755,6 +788,27 @@ In: &lt;em&gt;Statistics and its interface&lt;/em&gt; 7.4, pp. 571&amp;ndash;582
 (2003).
 &amp;ldquo;Slice sampling&amp;rdquo;.
 In: &lt;em&gt;Annals of Statistics&lt;/em&gt; 31.3, pp. 705&amp;ndash;767.&lt;/cite&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;cite&gt;Park, T. et al.
+(2008).
+&amp;ldquo;The Bayesian Lasso&amp;rdquo;.
+In: &lt;em&gt;Journal of the American Statistical Association&lt;/em&gt; 103.482, pp. 681&amp;ndash;686.&lt;/cite&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;cite&gt;Piironen, J. et al.
+(2017).
+&amp;ldquo;Sparsity information and regularization in the horseshoe and other shrinkage priors&amp;rdquo;.
+In: &lt;em&gt;Electronic Journal of Statistics&lt;/em&gt; 11.2, pp. 5018&amp;ndash;5051.
+DOI: &lt;a href="https://doi.org/10.1214/17-ejs1337si"&gt;10.1214/17-ejs1337si&lt;/a&gt;.&lt;/cite&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;cite&gt;Tibshirani, R.
+(1996).
+&amp;ldquo;Regression shrinkage and selection via the lasso&amp;rdquo;.
+In: &lt;em&gt;Journal of the Royal Statistical Society. Series B (Methodological)&lt;/em&gt;, pp. 267&amp;ndash;288.&lt;/cite&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;cite&gt;Zhang, Y. et al.
+(2017).
+&amp;ldquo;High dimensional linear regression via the R2-D2 shrinkage prior&amp;rdquo;.
+In: &lt;em&gt;arXiv preprint arXiv:1609.00046v2&lt;/em&gt;.&lt;/cite&gt;&lt;/p&gt;
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>

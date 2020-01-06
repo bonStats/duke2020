@@ -21,6 +21,7 @@ BibOptions(check.entries = FALSE,
            bib.style = "authoryear",
            cite.style = "authoryear",
            style = "html",
+           max.names = 1L,
            hyperlink = FALSE,
            dashed = FALSE)
 myBib <- ReadBib("bib-sc-sampler.bib", check = FALSE)
@@ -57,7 +58,7 @@ knitr::include_graphics("imgs/aquaman-hammerhead-1967-cartoon.JPG")
 
 ## The (Standard) Lasso
 
-Optimization-based Lasso:
+Optimization-based Lasso `r Citep(myBib, "Tibshirani1996")`:
 <br><br><br>
 
 .pull-left[.full-width[.content-box-blue[
@@ -86,7 +87,7 @@ cat("<br><br><br> see ",Citet("Tibshirani1996", bib = myBib))
 
 ## The Bayesian Lasso
 
-Probabilistic-based Lasso:
+Probabilistic-based Lasso `r Citep(myBib, "Park2008")`:
 <br><br><br>
 
 .pull-left[.full-width[.content-box-blue[
@@ -430,7 +431,7 @@ knitr::include_graphics("imgs/sc-rejection-viz1-pause.png")
 
 ---
 
-## Horseshoe prior as stochastic net
+## Horseshoe prior as stochastic net 
 
 .content-box-red[
 $$\begin{aligned}(\boldsymbol{\theta}, \omega \;\vert\; \boldsymbol{\lambda}) &\overset{\text{d}}{=} \left( \tilde{\boldsymbol{\theta}}, \tilde{\omega} \;\vert\; \Vert\tilde{\boldsymbol{\theta}} \oslash \boldsymbol{\lambda} \Vert_{2}^{2} \leq \tilde{\omega}, \boldsymbol{\lambda} \right) \\
@@ -447,9 +448,8 @@ $$\begin{aligned}\lambda_{i} &\sim \text{Cauchy}_{+}(0,1) \quad \text{for } 1 \l
 
 --
 
-Similar representations exist for
-- SNM, Regularized-horseshoe, Dirichlet-Laplace, R2-D2 prior
-- As well as "local" versions of these
+Representations exist for SNM, **Horseshoe** `r Citep(myBib, "Carvalho2010")`, **Regularized-horseshoe** `r Citep(myBib, "Piironen2017")`, **Dirichlet-Laplace** `r Citep(myBib, "Bhatta2015")`, **R2-D2** priors `r Citep(myBib, "Zhang2017")`
+
 
 <!--- Add box around SC part to demo marginalisation?--->
 
@@ -511,13 +511,25 @@ with $k_{i} \sim \text{Beta}(1/2,1/2)$
 
 Prior information that coefficients are positive with high probability
 
-Full horseshoe prior with skewed base prior
+Full horseshoe prior with skewed (improper) base prior
 
 .content-box-red[
 
-$$\tilde{\theta}_{i} \sim \text{N}(\mu_{i},\phi_{i}) \quad \text{for } 1 \leq i \leq p$$
+$$\tilde{\theta}_{i} \sim f_{\tilde{\theta}_{i}}(\theta) \propto \Phi(\theta/\alpha) \quad \text{for } 1 \leq i \leq p$$
 
 ]
+
+--
+
+In simulations: normal regression with positive coefficients 
+
+$n = 60$, $p \in \{ 50, 100, 250\}$:
+
+- Reduced SSE for $\theta \in \{0\}$ by factor of 2 to 4
+- SSE approximately equal for  $\theta \in (0,0.5)$ 
+- SSE slightly worse for  $\theta \in [0.5,\infty)$
+- Improved AUC marginally
+
 
 ---
 layout: false
@@ -726,7 +738,11 @@ class: inverse, middle, center
 <br>
 - Rare event simulation
 - Difficult normalising constant in prior
-<br><br>
+<br>
+
+$$p(\boldsymbol{\theta},\boldsymbol{\omega}) \propto f_{\tilde{\boldsymbol{\theta}}}(\boldsymbol{\theta})~f_{\tilde{\boldsymbol{\omega}}}(\boldsymbol{\omega})~1(\boldsymbol{r}(\boldsymbol{\theta}) \preceq \boldsymbol{\omega})$$
+
+<br>
 
 --
 
@@ -763,7 +779,8 @@ Other areas under investigation with stochastic constraints:
    <br><br>
    - Duke University & David Dunson
 
---
+---
+class: middle
 
 .pull-left[
 ```{r aqua-flying-fish, echo=FALSE, eval=TRUE, fig.align='center', out.height=258, out.width=350}
@@ -772,7 +789,7 @@ knitr::include_graphics("imgs/aquaman-flying-fish.gif")
 ]
 
 .pull-right[
-
+**Thank you**
 <br><br><br>
 Twitter: `@bonstats`
 <br><br><br>
