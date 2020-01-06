@@ -112,6 +112,8 @@ $$\tilde{\boldsymbol{\theta}} \sim f_{\tilde{\boldsymbol{\theta}}} \propto 1 \qq
 
 - Marginalising over $\tilde{\omega}$ results in the standard Bayesian Lasso.
 
+--
+
 - Both MAPs are equivalent to optimization-based Lasso (Lagrangian).
 
 <!--- More complicated, but exposes inner facets, Marginalising over $\omega$ results in the original Bayesian Lasso. --->
@@ -151,22 +153,37 @@ $$p(\boldsymbol{\theta},\omega) \propto \exp(-\lambda\omega)1(\Vert \boldsymbol{
 
 ---
 
-## Synergy between computation and theory
+## Computation versus theory 
 
-For 1D $\theta$, the pdf for the prior is
+The pdf of the Lasso SC prior can also be written as a scale mixture of uniforms.
+Using 1D as example:
+
+.pull-left[.full-width[.content-box-red[
+**Stochastic constraint**
+
 $$p(\theta,\omega) \propto \exp(-\lambda\omega)1(\vert \theta \vert \leq \omega)$$
-which has a scale mixture of uniforms representation
+]]]
+
+.pull-right[.full-width[.content-box-blue[
+**Scale mixture of uniforms**
 
 $$\begin{aligned}
 (\theta~\vert~\omega) &\sim \text{U}(-\omega, \omega) \\
 \omega &\sim \text{Gam}(2,1)
 \end{aligned}$$
+]]]
 
-Similar exists for more dimensions, but only works for the prior.
 
-Used in SMU paper....
+--
 
-Gelman comp leads to theory leads to comp paper.
+- This area of Bayesian computation is where priors with constraints have been used
+   - Slice sampling `r Citep(myBib, "Neal2003")` 
+   - SMU Lasso `r Citep(myBib, "Mallick2014new")`
+
+--
+
+- `r Citet(myBib, "Gelman2004")`: Re-parametrization for computation can also lead to theoretical insights (e.g. new priors)
+
 
 ---
 
@@ -289,8 +306,9 @@ print(plot_normal_l1_gamma)
 
 ## The Bayesian Lasso prior (again)
 
+Stochastic constraint priors with an exponential constraint have two main forms: 
 .pull-left[.full-width[.content-box-red[
-**Global SC prior**
+**Global**
 
 $$(\boldsymbol{\theta},\omega) \overset{\text{d}}{=} (\tilde{\boldsymbol{\theta}},\tilde{\omega}\;\; \text{s.t.}\;\; \Vert \tilde{\boldsymbol{\theta}} \Vert_{1} \leq \tilde{\omega})$$
 
@@ -298,22 +316,42 @@ $$\tilde{\boldsymbol{\theta}} \sim f_{\tilde{\boldsymbol{\theta}}} \propto 1 \qq
 ]]]
 
 .pull-right[.full-width[.content-box-red[
-**Local SC prior**
+**Local**
 
 $$(\boldsymbol{\theta},\boldsymbol{\omega}) \overset{\text{d}}{=} (\tilde{\boldsymbol{\theta}},\tilde{\boldsymbol{\omega}}\;\; \text{s.t.}\;\; \vert \tilde{\theta}_{i} \vert \leq \tilde{\omega}_{i}, \; 1 \leq i \leq p)$$
 
 $$\tilde{\boldsymbol{\theta}} \sim f_{\tilde{\boldsymbol{\theta}}} \propto 1 \qquad \tilde{\boldsymbol{\omega}} \overset{\text{iid}}{\sim} \text{Exp}(\lambda)$$
 ]]]
 
-$L_1$ versus $L_{\infty}$ constraint have same marginal distribution due to memorylessness property of exponential.
+- $L_1$ versus box constraint have same marginal distribution due to memorylessness property of exponential.
 
-Motivates use of non-serperable penalty functions, or in BA hierarchies which break this property.
+- Motivates use of non-serperable penalty functions, or in BA hierarchies which break this property.
 
 ---
 
 ## The Bayesian Lasso posterior (again)
 
-- Posterior is also a stochastic constraint RV
+Bayesian Lasso prior and posterior with stochastic constraints:
+
+.pull-left[.full-width[.content-box-red[
+**Prior**
+
+$$(\boldsymbol{\theta},\omega) \overset{\text{d}}{=} (\tilde{\boldsymbol{\theta}},\tilde{\omega}\;\; \text{s.t.}\;\; \Vert \tilde{\boldsymbol{\theta}} \Vert_{1} \leq \tilde{\omega})$$
+
+$$\tilde{\boldsymbol{\theta}} \sim f_{\tilde{\boldsymbol{\theta}}} \propto 1 \qquad \tilde{\omega} \sim \text{Exp}(\lambda)$$
+]]]
+
+.pull-right[.full-width[.content-box-red[
+**Posterior**
+
+$$(\boldsymbol{\theta},\omega~\vert~\boldsymbol{y}) \overset{\text{d}}{=} (\tilde{\boldsymbol{\theta}},\tilde{\omega}\;\; \text{s.t.}\;\; \Vert \tilde{\boldsymbol{\theta}} \Vert_{1} \leq \tilde{\omega}~\vert~\boldsymbol{y})$$
+
+$$(\tilde{\boldsymbol{\theta}}~\vert~\boldsymbol{y}) \sim f_{\tilde{\boldsymbol{\theta}}~\vert~\boldsymbol{y}}  \qquad \tilde{\omega} \sim \text{Exp}(\lambda)$$
+]]]
+
+- Posterior is also a stochastic constraint random variable
+
+- Learning how to sample SC can transfer to posterior samplers
 
 ---
 
@@ -371,14 +409,17 @@ knitr::include_graphics("imgs/sc-rejection-viz1-pause.png")
 
 ---
 
-## Horseshoe prior
+## Horseshoe prior as stochastic net
 
-$$(\boldsymbol{\theta}, \boldsymbol{\omega} \;\vert\; \boldsymbol{\lambda}) \overset{\text{d}}{=} \left( \tilde{\boldsymbol{\theta}}, \tilde{\boldsymbol{\omega}} \;\vert\; \tilde{\theta}_{i}^{2} \leq \tilde{\omega}_{i} \;\forall i \in P, \boldsymbol{\lambda} \right)$$
+.content-box-blue[
+$$(\boldsymbol{\theta}, \omega \;\vert\; \boldsymbol{\lambda}) \overset{\text{d}}{=} \left( \tilde{\boldsymbol{\theta}}, \tilde{\omega} \;\vert\; \Vert\tilde{\boldsymbol{\theta}} \oslash \boldsymbol{\lambda} \Vert_{2}^{2} \leq \tilde{\omega}, \boldsymbol{\lambda} \right)$$
 $$\tilde{\boldsymbol{\theta}} \sim f_{\tilde{\boldsymbol{\theta}}} \propto 1$$
-$$(\tilde{\omega}_{i}\vert\lambda_{i},\tau) \sim \text{Exp}(2^{-1} [\lambda_{i}\tau]^{-2})$$
-$$\lambda_{i} \sim \text{Cauchy}_{+}(0,1)$$
+$$\tilde{\omega} \sim \text{Exp}(1/2)$$
+]
+
+
+$$\lambda_{i} \sim \text{Cauchy}_{+}(0,1) \quad \text{for } 1 \leq i \leq p$$
 $$\tau  \sim \text{Cauchy}_{+}(0,1)$$
-$$\text{for } i \in P = \{1,2,3,\ldots,p\}$$
 --
 
 Similar representations exist for
@@ -386,6 +427,7 @@ Similar representations exist for
 - Regularized-horseshoe
 - Dirichlet-Laplace
 - R2-D2 prior
+- And "local" versions of these
 
 <!--- Add box around SC part to demo marginalisation?--->
 
@@ -397,7 +439,41 @@ class: inverse, middle, center
 
 ---
 
-## Shrinkage towards a nonzero value
+## Horseshoe with informative means
+
+Simple horseshoe prior ($\tau = \sigma = 1$)
+
+$$(\boldsymbol{\theta}, \omega \;\vert\; \boldsymbol{\lambda}) \overset{\text{d}}{=} \left( \tilde{\boldsymbol{\theta}}, \tilde{\omega} \;\vert\; \Vert\tilde{\boldsymbol{\theta}} \oslash \boldsymbol{\lambda} \Vert_{2}^{2} \leq \tilde{\omega}, \boldsymbol{\lambda} \right)$$
+$$\tilde{\boldsymbol{\theta}} \sim f_{\tilde{\boldsymbol{\theta}}} \propto 1$$
+$$\tilde{\omega} \sim \text{Exp}(1/2)$$
+$$\lambda_{i} \sim \text{Cauchy}_{+}(0,1)$$
+
+Under a normal means model, the horseshoe prior is known to have shrinkage profile
+
+$$
+\text{E}(\theta_{i},k_{i}|\boldsymbol{y}) = (1-k_{i})y_{i}  
+$$
+with $k_{i} \sim \text{Beta}(1/2,1/2)$
+
+---
+
+## Horseshoe with informative means
+
+Simple horseshoe prior ($\tau = \sigma = 1$) with informative base prior
+
+$$(\boldsymbol{\theta}, \omega \;\vert\; \boldsymbol{\lambda}) \overset{\text{d}}{=} \left( \tilde{\boldsymbol{\theta}}, \tilde{\omega} \;\vert\; \Vert\tilde{\boldsymbol{\theta}} \oslash \boldsymbol{\lambda} \Vert_{2}^{2} \leq \tilde{\omega}, \boldsymbol{\lambda} \right)$$
+
+$$\tilde{\theta}_{i} \sim \text{N}(\mu_{i},\phi_{i}) \quad \text{for } 1 \leq i \leq p$$
+
+$$\tilde{\omega} \sim \text{Exp}(1/2)$$
+$$\lambda_{i} \sim \text{Cauchy}_{+}(0,1)$$
+
+Under a normal means model, the **informative** horseshoe prior has shrinkage profile
+
+$$
+\text{E}(\theta_{i},k_{i}|\boldsymbol{y}) = \frac{(1-k_{i})(y_{i} + \mu_{i}\phi_{i}^{-1} )}{1 + (1-k_{i})\phi_{i}^{-1}}
+$$
+with $k_{i} \sim \text{Beta}(1/2,1/2)$
 
 ---
 
@@ -506,6 +582,8 @@ class: inverse, middle, center
 
 ---
 
+### Truncated-Gibbs sampler summary
+
 - In high dimensions with shrinkage priors, the majority of coefficients are forced to be very close to zero.
  
 --
@@ -586,11 +664,13 @@ class: inverse, middle, center
 
 ## Strengths of SCP
 
+- More views of shrinkage, e.g. rare event estimation
+
 ---
 
 ## Weaknesses of SCP
 
-+ Remedies
+- Remedies
 
 ---
 
@@ -628,17 +708,10 @@ knitr::include_graphics("imgs/aquaman-flying-fish.gif")
 
 ---
 
-## (A random sample of) Key references
+## References
 
 ```{r bib-list, echo = FALSE, results='asis'}
 
-s_cites <- sample(names(myBib), size = 6)
-
-for(s in s_cites){
-  
-  p <- NoCite(bib = myBib,  s)
-  
-}
-
 RefManageR::PrintBibliography(myBib)
+
 ```
