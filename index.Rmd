@@ -32,15 +32,15 @@ source("one-dim-sc-example-viz.R")
 
 ## Talk outline
 <br>
-1. **Motivation from the (Bayesian) Lasso** 
+1. Motivation from the (Bayesian) Lasso 
 <br><br><br>
-2. **Stochastic constraints variables & Stochastic nets**
+2. Stochastic constraints variables & Stochastic nets
 <br><br><br>
-3. **New priors from stochastic constraints** 
+3. New priors from stochastic constraints 
 <br><br><br>
-4. **Faster samplers for High-dimensional shrinkage**
+4. Faster samplers for High-dimensional shrinkage
 <br><br><br>
-5. **Discussion**
+5. Strengths, weaknesses, and beyond
 
 
 ---
@@ -155,8 +155,7 @@ $$p(\boldsymbol{\theta},\omega) \propto \exp(-\lambda\omega)1(\Vert \boldsymbol{
 
 ## Computation versus theory 
 
-The pdf of the Lasso SC prior can also be written as a scale mixture of uniforms.
-Using 1D as example:
+The SC Lasso prior is also a scale mixture of uniforms. In 1D:
 
 .pull-left[.full-width[.content-box-red[
 **Stochastic constraint**
@@ -176,18 +175,18 @@ $$\begin{aligned}
 
 --
 
-- This area of Bayesian computation is where priors with constraints have been used
+- Bayesian computation is where priors with constraints have been used
    - Slice sampling `r Citep(myBib, "Neal2003")` 
    - SMU Lasso `r Citep(myBib, "Mallick2014new")`
 
 --
 
-- `r Citet(myBib, "Gelman2004")`: Re-parametrization for computation can also lead to theoretical insights (e.g. new priors)
+- `r Citet(myBib, "Gelman2004")`: Re-parameterization for computation can also lead to theoretical insights (e.g. new priors)
 
 
 ---
 
-## Duality and analogy to regularization
+## Duality and analogy for regularization
 <br><br><br>
 
 | *Inference*  | *Regularization*                                          |
@@ -201,7 +200,7 @@ $$\begin{aligned}
 <!--- The duality between stochastic constraint priors and their standard representation is analagous to the duality between penalty and constraint regularization in optimization.--->
 There is a duality in the optimization setting, 
 
-*and for the priors in a Bayesian analysis*.
+*and for the priors in Bayesian analysis*.
 
 ---
 
@@ -227,11 +226,13 @@ $$p(\boldsymbol{\theta},\boldsymbol{\omega}) \propto f_{\tilde{\boldsymbol{\thet
 
 --
 
-- Decomposition exposes marginal and multivariate components of the prior.
+- Decomposition exposes marginal and multivariate parts of the prior.
 
 --
 
-**Connections**: Scale mixture of normal/uniform, slice sampling, skew random variables, exponentially tilted random variables,...
+**Connections**: 
+
+- SMU, SMN, slice sampling, skew RVs, exponentially tilted RVs
 
 <!---#### Base prior: 
 
@@ -315,21 +316,31 @@ $$(\boldsymbol{\theta},\omega) \overset{\text{d}}{=} (\tilde{\boldsymbol{\theta}
 $$\tilde{\boldsymbol{\theta}} \sim f_{\tilde{\boldsymbol{\theta}}} \propto 1 \qquad \tilde{\omega} \sim \text{Exp}(\lambda)$$
 ]]]
 
+--
+
 .pull-right[.full-width[.content-box-red[
 **Local**
 
-$$(\boldsymbol{\theta},\boldsymbol{\omega}) \overset{\text{d}}{=} (\tilde{\boldsymbol{\theta}},\tilde{\boldsymbol{\omega}}\;\; \text{s.t.}\;\; \vert \tilde{\theta}_{i} \vert \leq \tilde{\omega}_{i}, \; 1 \leq i \leq p)$$
+$$(\boldsymbol{\theta},\boldsymbol{\omega}) \overset{\text{d}}{=} (\tilde{\boldsymbol{\theta}},\tilde{\boldsymbol{\omega}}\;\; \text{s.t.}\;\; \vert \tilde{\theta}_{i} \vert \leq \tilde{\omega}_{i})$$
 
 $$\tilde{\boldsymbol{\theta}} \sim f_{\tilde{\boldsymbol{\theta}}} \propto 1 \qquad \tilde{\boldsymbol{\omega}} \overset{\text{iid}}{\sim} \text{Exp}(\lambda)$$
 ]]]
 
-- $L_1$ versus box constraint have same marginal distribution due to memorylessness property of exponential.
+--
 
-- Motivates use of non-serperable penalty functions, or in BA hierarchies which break this property.
+- Global uses $L_1$ constraint 
+- Local uses box constraint 
+- Both have same marginal distribution due to memorylessness property
+
+--
+
+**Future work:**
+
+- Motivates use of non-separable penalty functions
 
 ---
 
-## The Bayesian Lasso posterior (again)
+## The Bayesian Lasso posterior
 
 Bayesian Lasso prior and posterior with stochastic constraints:
 
@@ -341,52 +352,69 @@ $$(\boldsymbol{\theta},\omega) \overset{\text{d}}{=} (\tilde{\boldsymbol{\theta}
 $$\tilde{\boldsymbol{\theta}} \sim f_{\tilde{\boldsymbol{\theta}}} \propto 1 \qquad \tilde{\omega} \sim \text{Exp}(\lambda)$$
 ]]]
 
+--
+
 .pull-right[.full-width[.content-box-red[
 **Posterior**
 
-$$(\boldsymbol{\theta},\omega~\vert~\boldsymbol{y}) \overset{\text{d}}{=} (\tilde{\boldsymbol{\theta}},\tilde{\omega}\;\; \text{s.t.}\;\; \Vert \tilde{\boldsymbol{\theta}} \Vert_{1} \leq \tilde{\omega}~\vert~\boldsymbol{y})$$
+$$(\boldsymbol{\theta},\omega~\vert~\boldsymbol{y}) \overset{\text{d}}{=} (\tilde{\boldsymbol{\theta}},\tilde{\omega} \;\vert\; \Vert \tilde{\boldsymbol{\theta}} \Vert_{1} \leq \tilde{\omega}, \boldsymbol{y})$$
 
 $$(\tilde{\boldsymbol{\theta}}~\vert~\boldsymbol{y}) \sim f_{\tilde{\boldsymbol{\theta}}~\vert~\boldsymbol{y}}  \qquad \tilde{\omega} \sim \text{Exp}(\lambda)$$
 ]]]
 
+--
+
 - Posterior is also a stochastic constraint random variable
 
-- Learning how to sample SC can transfer to posterior samplers
+- Learning how to sample creates posterior samplers
 
 ---
 
 ## Stochastic nets
 
-- A restricted family of stochastic constraint priors
+.content-box-blue[
 
-.pull-left[.full-width[.content-box-blue[
 $$\begin{aligned}
 	\left(\boldsymbol{\theta}, \omega \vert \boldsymbol{k} \right) &\overset{\text{d}}{=} \left( \tilde{\boldsymbol{\theta}}, \tilde{\omega} \mid  \Vert \tilde{\boldsymbol{\theta}} \oslash \boldsymbol{k} \Vert_{\nu}^{\nu} \leq \tilde{\omega},  \boldsymbol{k}\right) \\ 
-	\tilde{\boldsymbol{\theta}} &\sim f_{\tilde{\boldsymbol{\theta}}} \propto 1, \quad \tilde{\boldsymbol{\theta}} \in \mathbb{R}^{p} \\ 
+	\tilde{\boldsymbol{\theta}} &\sim f_{\tilde{\boldsymbol{\theta}}}, \quad \tilde{\boldsymbol{\theta}} \in \mathbb{R}^{p} \\ 
 	 \tilde{\omega} &\sim \text{Exp}(1) \\
 	 \boldsymbol{k} &\sim f_{\boldsymbol{k}}
 \end{aligned}$$
-]]]
 
-.pull-right[
-```{r sc-reject-shape, echo=FALSE, eval=TRUE, fig.align='center', out.height=300, out.width=360}
+]
+
+--
+
+.pull-left[
+```{r sc-reject-shape, echo=FALSE, eval=TRUE, fig.align='center', out.height=240, out.width=288}
 knitr::include_graphics("imgs/sc-rej-shape-only.png")
 ```
 ]
 
-- Includes continuous shrinkage priors (horseshoe etc.)
+--
+
+.pull-right[
+- A restricted family of stochastic constraint priors
+<br><br>
+- Constrained to anisotropic $L\text{-}\nu$ ball with length-scale $\boldsymbol{k}$
+<br><br>
+- Geometry of continuous shrinkage priors
+]
 
 ---
 
 ## Visualisation of generative process
 
-$$(x,y) \sim \text{N}(0,1)$$
+.content-box-blue[
 
-$$\boldsymbol{\lambda} \sim \text{Dir}(1,1)$$
+$$\begin{aligned}
+(x,y) &\sim \text{N}(0,1)\\
+\boldsymbol{\lambda} &\sim \text{Dir}(1,1)\\
+\tau &\sim \text{Exp}(2)\\
+\text{s.t. }  \lambda_{1}\vert x \vert &+ \lambda_{2}\vert y \vert \leq \tau
+\end{aligned}$$
 
-$$\tau \sim \text{Exp}(2)$$
-
-$$\text{s.t. } \lambda_{1}\vert x \vert + \lambda_{2}\vert y \vert \leq \tau$$
+]
 
 ```{r sc-reject-gif, echo=FALSE, eval=TRUE, fig.align='center'}
 knitr::include_graphics("imgs/sc-rejection-viz1.gif")
@@ -396,13 +424,6 @@ knitr::include_graphics("imgs/sc-rejection-viz1.gif")
 
 ## Visualisation of generative process
 
-$$(x,y) \sim \text{N}(0,1)$$
-$$\boldsymbol{\lambda} \sim \text{Dir}(1,1)$$
-
-$$\tau \sim \text{Exp}(2)$$
-
-$$\text{s.t. } \lambda_{1}\vert x \vert + \lambda_{2}\vert y \vert \leq \tau$$
-
 ```{r sc-reject-pause, echo=FALSE, eval=TRUE, fig.align='center'}
 knitr::include_graphics("imgs/sc-rejection-viz1-pause.png")
 ```
@@ -411,23 +432,24 @@ knitr::include_graphics("imgs/sc-rejection-viz1-pause.png")
 
 ## Horseshoe prior as stochastic net
 
-.content-box-blue[
-$$(\boldsymbol{\theta}, \omega \;\vert\; \boldsymbol{\lambda}) \overset{\text{d}}{=} \left( \tilde{\boldsymbol{\theta}}, \tilde{\omega} \;\vert\; \Vert\tilde{\boldsymbol{\theta}} \oslash \boldsymbol{\lambda} \Vert_{2}^{2} \leq \tilde{\omega}, \boldsymbol{\lambda} \right)$$
-$$\tilde{\boldsymbol{\theta}} \sim f_{\tilde{\boldsymbol{\theta}}} \propto 1$$
-$$\tilde{\omega} \sim \text{Exp}(1/2)$$
+.content-box-red[
+$$\begin{aligned}(\boldsymbol{\theta}, \omega \;\vert\; \boldsymbol{\lambda}) &\overset{\text{d}}{=} \left( \tilde{\boldsymbol{\theta}}, \tilde{\omega} \;\vert\; \Vert\tilde{\boldsymbol{\theta}} \oslash \boldsymbol{\lambda} \Vert_{2}^{2} \leq \tilde{\omega}, \boldsymbol{\lambda} \right) \\
+\tilde{\boldsymbol{\theta}} &\sim f_{\tilde{\boldsymbol{\theta}}} \propto 1 \\
+\tilde{\omega} &\sim \text{Exp}(1/2)
+\end{aligned}$$
 ]
 
+.content-box-blue[
+$$\begin{aligned}\lambda_{i} &\sim \text{Cauchy}_{+}(0,1) \quad \text{for } 1 \leq i \leq p \\
+\tau  &\sim \text{Cauchy}_{+}(0,1)
+\end{aligned}$$
+]
 
-$$\lambda_{i} \sim \text{Cauchy}_{+}(0,1) \quad \text{for } 1 \leq i \leq p$$
-$$\tau  \sim \text{Cauchy}_{+}(0,1)$$
 --
 
 Similar representations exist for
-- Scale-normal mixtures
-- Regularized-horseshoe
-- Dirichlet-Laplace
-- R2-D2 prior
-- And "local" versions of these
+- SNM, Regularized-horseshoe, Dirichlet-Laplace, R2-D2 prior
+- As well as "local" versions of these
 
 <!--- Add box around SC part to demo marginalisation?--->
 
@@ -441,43 +463,61 @@ class: inverse, middle, center
 
 ## Horseshoe with informative means
 
-Simple horseshoe prior ($\tau = \sigma = 1$)
+Simple horseshoe prior ( $\tau = \sigma = 1$ ) with flat base prior
 
-$$(\boldsymbol{\theta}, \omega \;\vert\; \boldsymbol{\lambda}) \overset{\text{d}}{=} \left( \tilde{\boldsymbol{\theta}}, \tilde{\omega} \;\vert\; \Vert\tilde{\boldsymbol{\theta}} \oslash \boldsymbol{\lambda} \Vert_{2}^{2} \leq \tilde{\omega}, \boldsymbol{\lambda} \right)$$
+.content-box-red[
+
 $$\tilde{\boldsymbol{\theta}} \sim f_{\tilde{\boldsymbol{\theta}}} \propto 1$$
-$$\tilde{\omega} \sim \text{Exp}(1/2)$$
-$$\lambda_{i} \sim \text{Cauchy}_{+}(0,1)$$
 
-Under a normal means model, the horseshoe prior is known to have shrinkage profile
+]
 
-$$
-\text{E}(\theta_{i},k_{i}|\boldsymbol{y}) = (1-k_{i})y_{i}  
-$$
+--
+
+Normal means model + horseshoe prior has shrinkage profile
+.content-box-blue[
+
+$$\text{E}(\theta_{i}|k_{i},\boldsymbol{y}) = (1-k_{i})y_{i}$$
+
+]
+
 with $k_{i} \sim \text{Beta}(1/2,1/2)$
 
 ---
 
 ## Horseshoe with informative means
 
-Simple horseshoe prior ($\tau = \sigma = 1$) with informative base prior
+Simple horseshoe prior ( $\tau = \sigma = 1$ ) with informative base prior
 
-$$(\boldsymbol{\theta}, \omega \;\vert\; \boldsymbol{\lambda}) \overset{\text{d}}{=} \left( \tilde{\boldsymbol{\theta}}, \tilde{\omega} \;\vert\; \Vert\tilde{\boldsymbol{\theta}} \oslash \boldsymbol{\lambda} \Vert_{2}^{2} \leq \tilde{\omega}, \boldsymbol{\lambda} \right)$$
+.content-box-red[
 
 $$\tilde{\theta}_{i} \sim \text{N}(\mu_{i},\phi_{i}) \quad \text{for } 1 \leq i \leq p$$
 
-$$\tilde{\omega} \sim \text{Exp}(1/2)$$
-$$\lambda_{i} \sim \text{Cauchy}_{+}(0,1)$$
+]
 
-Under a normal means model, the **informative** horseshoe prior has shrinkage profile
+--
 
-$$
-\text{E}(\theta_{i},k_{i}|\boldsymbol{y}) = \frac{(1-k_{i})(y_{i} + \mu_{i}\phi_{i}^{-1} )}{1 + (1-k_{i})\phi_{i}^{-1}}
-$$
+Normal means model + **informative** horseshoe prior has shrinkage profile
+.content-box-blue[
+
+$$\text{E}(\theta_{i}|k_{i},\boldsymbol{y}) = \frac{(1-k_{i})(y_{i} + \mu_{i}\phi_{i}^{-1} )}{1 + (1-k_{i})\phi_{i}^{-1}}$$
+
+]
+
 with $k_{i} \sim \text{Beta}(1/2,1/2)$
 
 ---
 
 ## Positively-skewed Horseshoe
+
+Prior information that coefficients are positive with high probability
+
+Full horseshoe prior with skewed base prior
+
+.content-box-red[
+
+$$\tilde{\theta}_{i} \sim \text{N}(\mu_{i},\phi_{i}) \quad \text{for } 1 \leq i \leq p$$
+
+]
 
 ---
 layout: false
@@ -593,7 +633,6 @@ class: inverse, middle, center
 
 --
 
-Be like Aquaman!
 <br><br>
 ```{r more-aqua, echo=FALSE, eval=TRUE, fig.align='center'}
 knitr::include_graphics("imgs/aquaman-jetski.gif")
@@ -658,52 +697,88 @@ knitr::include_graphics("imgs/table-time.png")
 layout: false
 class: inverse, middle, center
 
-## Discussion
+## Strengths, weaknesses, and beyond
 
 ---
 
 ## Strengths of SCP
 
-- More views of shrinkage, e.g. rare event estimation
+**More views on shrinkage**
+<br>
+- Geometry of stochastic constraints
+- Stochastic constraints as rare events
+- A type of "conjugacy" for posterior
+<br><br>
+
+--
+
+**Very flexible**
+<br>
+- Base, constraining RVs
+- Penalty function
+- New priors for high dimensions
 
 ---
 
 ## Weaknesses of SCP
 
-- Remedies
+**In general hard to sample**
+<br>
+- Rare event simulation
+- Difficult normalising constant in prior
+<br><br>
+
+--
+
+**Preference to avoid constraints**
+<br><br>
+
+--
+
+**Theory more cumbersome with constraints**
 
 ---
 
-## Conclusions
+## Current/future work
 
-- One technique for scaling with dimension where sparsity is desired.
+Other areas under investigation with stochastic constraints:
 
-- Can be combined with other techniques
-
-- Other areas under investigation with stochastic constraints:
-
-   - Theoretical results
+- Exact sampler for SC (e.g. Bayesian Lasso)
    
-   - Discrete version
+- Theoretical results
+   
+- Discrete version
 
-   - Prior construction
-   
-   - Variable selection from continuous-shrinkage prior
-   
-   - You tell me!
-   
-- Acknowledgements: 
-
-   - Berwin Turlach, Kevin Murray, Chris Drovandi
-   - Pawsey HPC
-   - QUT & ACEMS
+- Prior construction
 
 ---
 
-```{r aqua-flying-fish, echo=FALSE, eval=TRUE, fig.align='center'}
+### Acknowledgements
+
+   - Masters supervisors: Berwin Turlach, Kevin Murray, Chris Drovandi
+   <br><br>
+   - University of Western Australia, Pawsey Supercomputing Centre
+   <br><br>
+   - Queensland University of Technology & ACEMS
+   <br><br>
+   - Duke University & David Dunson
+
+--
+
+.pull-left[
+```{r aqua-flying-fish, echo=FALSE, eval=TRUE, fig.align='center', out.height=258, out.width=350}
 knitr::include_graphics("imgs/aquaman-flying-fish.gif")
 ```
+]
 
+.pull-right[
+
+<br><br><br>
+Twitter: `@bonstats`
+<br><br><br>
+Email: `joshuajbon@gmail.com`
+
+]
 
 
 ---
